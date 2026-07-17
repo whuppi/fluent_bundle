@@ -1,16 +1,17 @@
 <!--
-  Banner stays <picture> for GitHub's dark/light. pub.dev strips <picture>
-  when sanitizing the README, so the publish step flattens it to the inner
-  <img> via the release tool's --stamp-readme (the repo copy is untouched).
-  Drop both once pub.dev renders <picture>. Tracking:
-  dart-lang/pub-dev#5923, dart-lang/pub-dev#6363, google/dart-neats#383.
+  Banner stays <picture> for GitHub's dark/light rendering. pub.dev strips
+  <picture> when sanitizing the README and falls back to the inner <img>
+  (the light variant) — which renders fine there. The heavy *-3x.png
+  sources stay tracked in git; only the optimized *-web-min.webp files
+  ship in the pub archive (see .pubignore). Drop the <picture> wrapper
+  once pub.dev renders it. Tracking: dart-lang/pub-dev#5923.
 -->
 <p align="center">
   <picture>
-    <source media="(prefers-color-scheme: dark)"  srcset="assets/banner_dark-web-min.webp">
-    <source media="(prefers-color-scheme: light)" srcset="assets/banner_light-web-min.webp">
+    <source media="(prefers-color-scheme: dark)"  srcset="assets/fluent_bundle-banner-dark-web-min.webp">
+    <source media="(prefers-color-scheme: light)" srcset="assets/fluent_bundle-banner-light-web-min.webp">
     <img alt="fluent_bundle — Project Fluent for Dart & Flutter"
-         src="assets/banner_light-web-min.webp" width="100%">
+         src="assets/fluent_bundle-banner-light-web-min.webp" width="100%">
   </picture>
 </p>
 

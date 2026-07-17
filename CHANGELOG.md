@@ -59,3 +59,12 @@ CONTENT RULES (never change)
 -->
 
 <!-- Add new versions below, newest first. -->
+
+## 0.1.0
+
+First release — Project Fluent, Mozilla's localization system (the one Firefox ships), as a pure-Dart runtime.
+
+- **API:** parse `.ftl` resources and format messages, terms, and attributes by id; selectors and plurals; `NUMBER` and `DATETIME`; custom functions (`FluentFunction`); inline markup returned as a walkable span tree; locale negotiation with `FluentBundleChain` fallback; live resource updates. `FluentBundle` is the entry point; every formatted argument is a `FluentValue`.
+- **Resolution:** every failure — a missing message, a bad argument, a cyclic reference — resolves to a value with the error collected separately, never a thrown exception, so one broken message can't crash formatting.
+- **Backends:** a pluggable seam (`FluentBackend`, `FluentFormatContext`, `PluralCategory`) supplies CLDR-grade number, date, and plural formatting; the `fluent_intl` and `fluent_icu` satellites implement it. Without a backend the runtime still parses and resolves.
+- **Platforms:** pure Dart — no native code, no build steps, no platform plugins. One package on mobile, desktop, web, CLI, and server. No Flutter dependency.
