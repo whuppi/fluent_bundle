@@ -39,7 +39,7 @@ dependencies:
 
 dev_dependencies:
   # Lint rules
-  lints: ^5.0.0
+  lints: ">=5.0.0 <7.0.0"
 
   # Test runner — the VM and Chrome lanes both execute under `dart test`
   test: ^1.25.0
