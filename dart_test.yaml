@@ -1,0 +1,17 @@
+# Default test target is the VM. The whole suite ALSO runs in real Chrome:
+#
+#   dart test              # VM
+#   dart test -p chrome    # the same suites in a real browser
+#
+# Or use the Makefile: make test / make test-web / make check. Every suite
+# is two-world unless it declares @TestOn('vm') — `make test-guards`
+# enforces that dart:io / dart:ffi importers do.
+
+platforms: [vm]
+
+# On CI (Chrome for Testing), --no-sandbox is required because the SUID
+# sandbox binary isn't included. Locally this flag is harmless.
+override_platforms:
+  chrome:
+    settings:
+      arguments: --no-sandbox --disable-gpu

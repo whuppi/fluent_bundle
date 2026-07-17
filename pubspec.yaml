@@ -1,0 +1,45 @@
+name: fluent_bundle
+version: 0.0.0
+description: >-
+  Project Fluent (Mozilla's localization system) for Dart — a
+  spec-complete parser and resolver with pluggable locale backends and
+  inline-markup spans.
+homepage: https://github.com/whuppi/fluent_bundle
+repository: https://github.com/whuppi/fluent_bundle
+issue_tracker: https://github.com/whuppi/fluent_bundle/issues
+
+topics:
+  - i18n
+  - localization
+  - fluent
+  - l10n
+  - intl
+
+# Dev-time CLI. Two invocation modes both work:
+#   * From a dependent project: `dart run fluent_bundle:watch` (auto-resolves
+#     to `bin/watch.dart`).
+#   * Globally installed:        `dart pub global activate fluent_bundle`.
+executables:
+  watch:
+
+environment:
+  sdk: ^3.7.0
+
+# Pure Dart on purpose — no Flutter SDK, no plugins, no CLDR data. The
+# core of the fluent family: satellites add CLDR backends (fluent_intl,
+# fluent_icu), codegen (fluent_gen), and Flutter wiring (fluent_flutter).
+dependencies:
+  # HTML5-conformant parser for the inline-markup feature in
+  # `package:fluent_bundle/markup.dart`. Pure Dart, the Dart team's
+  # verified-publisher port of html5lib-python.
+  html: ^0.15.0
+
+  # Annotations (@immutable, @visibleForTesting)
+  meta: ^1.16.0
+
+dev_dependencies:
+  # Lint rules
+  lints: ^5.0.0
+
+  # Test runner — the VM and Chrome lanes both execute under `dart test`
+  test: ^1.25.0

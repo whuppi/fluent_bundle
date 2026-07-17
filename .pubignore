@@ -1,0 +1,15 @@
+# Published-archive excludes (repo keeps these; consumers never need them).
+# Tests can never affect a consumer app's size either way (not in any
+# import graph); tooling and internal docs are repo concerns.
+test/
+tool/
+Makefile
+docs/
+.githooks/
+dart_test.yaml
+
+# Banner: ship only the optimized *-web-min.webp the README embeds. The
+# heavy *-3x.png sources stay tracked in git (org-quality preservation)
+# but out of the published download — nothing references them on pub.dev.
+assets/banner_dark-3x.png
+assets/banner_light-3x.png
