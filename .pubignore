@@ -11,5 +11,5 @@ dart_test.yaml
 # Banner: ship only the optimized *-web-min.webp the README embeds. The
 # heavy *-3x.png sources stay tracked in git (org-quality preservation)
 # but out of the published download — nothing references them on pub.dev.
-assets/banner_dark-3x.png
-assets/banner_light-3x.png
+assets/fluent_bundle-banner-dark-3x.png
+assets/fluent_bundle-banner-light-3x.png
