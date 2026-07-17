@@ -23,11 +23,11 @@
   <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-blue.svg" alt="license: MIT"></a>
 </p>
 
-[Project Fluent](https://projectfluent.org/) — Mozilla's localization system, the one Firefox ships — for Dart & Flutter. Translators write plurals, gender, and per-locale special cases directly in the `.ftl` file; your code asks for a message by id and passes arguments. This package is the complete runtime: a spec-complete parser, a resolver where every failure is a value instead of a crash, inline markup that comes back as a walkable span tree, locale negotiation, and a pluggable backend seam for CLDR-grade formatting.
+[Project Fluent](https://projectfluent.org/) is Mozilla's translation system — the one Firefox uses — now for Dart and Flutter. Your code asks for a message by name and passes in values; a translator writes what that message says in a plain `.ftl` text file, including the plural and gender rules their language needs. This package reads those files and gives you back the finished text. A broken translation never crashes your app — it returns the best text it can and hands you the error separately.
 
-Pure Dart. No native code, no build steps, no platform plugins — the same package runs in a phone app, a CLI, a server, and a browser tab.
+Pure Dart. No native code, no build step, no platform plugins — the same package runs in a phone app, a command-line tool, a server, and a browser tab.
 
-> **Building a Flutter app?** Start at [`fluent_flutter`](https://pub.dev/packages/fluent_flutter) — it re-exports this entire runtime and adds the app wiring: asset loading, locale lifecycle, delegates, widgets. This package is the front door for pure Dart — CLIs, servers, your own integrations.
+> **Building a Flutter app?** Start with [`fluent_flutter`](https://pub.dev/packages/fluent_flutter) — it includes everything here and adds the Flutter parts: loading `.ftl` files from your assets, switching languages, the `MaterialApp` hook-up, and widgets. Use this package on its own for pure Dart: command-line tools, servers, your own setup.
 
 > **Status:** 0.x. The API can change between minor versions until `1.0.0` — pre-1.0, the minor is the breaking axis, so pin `^0.N.0` and read the changelog on minor bumps.
 
@@ -40,20 +40,20 @@ Pure Dart. No native code, no build steps, no platform plugins — the same pack
 
 - [Install](#install)
 - [Quick start](#quick-start)
-- [The backend seam](#the-backend-seam)
+- [Numbers, dates, and plurals need a backend](#numbers-dates-and-plurals-need-a-backend)
 - [Usage](#usage)
   - [Messages, terms, attributes](#messages-terms-attributes)
   - [Selectors and plurals](#selectors-and-plurals)
   - [NUMBER and DATETIME](#number-and-datetime)
-  - [Bidi isolation and transforms](#bidi-isolation-and-transforms)
+  - [Right-to-left text and transforms](#right-to-left-text-and-transforms)
   - [Custom functions](#custom-functions)
   - [Locale negotiation and bundle chains](#locale-negotiation-and-bundle-chains)
   - [Inline markup](#inline-markup)
   - [Live updates](#live-updates)
-  - [The syntax barrel](#the-syntax-barrel)
+  - [Using the parser on its own](#using-the-parser-on-its-own)
 - [Error handling](#error-handling)
 - [Platform support](#platform-support)
-- [Choosing Fluent (and when not to)](#choosing-fluent-and-when-not-to)
+- [When to use Fluent (and when not)](#when-to-use-fluent-and-when-not)
 - [The family](#the-family)
 - [Docs](#docs)
 - [License](#license)
@@ -88,49 +88,49 @@ login = Sign in
 ''');
 
 print(bundle.formatMessage('welcome', args: {'name': 'Aria'}));
-// "Welcome to Fluent, Aria!"  (the value is bidi-isolated — see Usage)
+// "Welcome to Fluent, Aria!"  (the name is wrapped so right-to-left text can't scramble the line — see Usage)
 
 print(bundle.formatMessage('login', attribute: 'title'));
 // "Sign in to Fluent"
 ```
 
-That's the shape of every call: add FTL to a bundle, ask for a message by id, pass arguments as a map. `hasMessage`, `getMessage`, `formatMessage`, `formatMessageAsSpans` — same shape, a different question.
+Every call works the same way: add `.ftl` text to a bundle, ask for a message by name, pass values as a map. `hasMessage`, `getMessage`, `formatMessage`, and `formatMessageAsSpans` all follow that pattern — each answers a slightly different question.
 
 The FTL syntax itself is the translator's language, not this README's job — the [Fluent syntax guide](https://projectfluent.org/fluent/guide/) covers it in twenty minutes.
 
 ---
 
-## The backend seam
+## Numbers, dates, and plurals need a backend
 
-Plural rules and locale-aware formatting are *data* problems — CLDR knows that Polish has four plural forms and that German swaps the comma and the period. The core deliberately doesn't carry that data. Instead, every `FluentBundle` formats through a `FluentBackend`, and you pick which one:
+Getting plurals and number and date formatting right for every language takes a lot of data — which languages have how many plural forms, which use a comma for the decimal point, and so on. `fluent_bundle` doesn't carry that data itself. Instead it hands the formatting to a *backend* that you choose:
 
-|  | Spec fallback (built in) | [`fluent_intl`](https://pub.dev/packages/fluent_intl) | [`fluent_icu`](https://pub.dev/packages/fluent_icu) |
+|  | Built-in (no backend) | [`fluent_intl`](https://pub.dev/packages/fluent_intl) | [`fluent_icu`](https://pub.dev/packages/fluent_icu) |
 |---|---|---|---|
-| **Engine** | none — pure spec behavior | `package:intl` | ICU4X via [`icu_kit`](https://pub.dev/packages/icu_kit) |
-| **Plural rules** | everything is `other` | CLDR cardinals + ordinals | CLDR cardinals + ordinals, every locale |
-| **NUMBER / DATETIME** | digit options only, ISO-8601 dates | locale-aware, most ECMA-402 options | full ECMA-402: units, calendars, time zones, numbering systems |
-| **Setup** | nothing | nothing | one init call; icu_kit ships the engine |
-| **Footprint** | zero | pure Dart | a compiled engine (icu_kit's README has the size dial) |
+| **Runs on** | nothing extra | `package:intl` | ICU4X via [`icu_kit`](https://pub.dev/packages/icu_kit) |
+| **Plurals** | no real rules — everything counts as one category | full rules for every language, plus ordinals (1st, 2nd) | same, for every language |
+| **Numbers & dates** | correct digits, but no separators, symbols, or locale styling | locale-aware, most number and date options | every number and date option — units, calendars, time zones, other digit systems |
+| **Setup** | none | none | one line at startup; the engine ships with icu_kit |
+| **Size added** | none | none (pure Dart) | a compiled engine (icu_kit's README covers trimming it) |
 
 ```dart
-// The one-line swap — no message changes, no call-site changes:
+// Switching backend changes nothing else — same messages, same calls:
 final bundle = FluentBundle('pl', backend: IntlBackend())..addResource(ftl);
 ```
 
-The seam is the whole point: your FTL, your call sites, and your tests are identical under every backend. Start with the built-in fallback, feel the moment `[one]` stops matching, add a satellite.
+That's the point: your `.ftl` files, your Dart calls, and your tests stay identical no matter which backend you use. Start with the built-in one; when you notice a plural like `[one]` not matching correctly, add `fluent_intl` or `fluent_icu`.
 
 <details>
-<summary><b>🧩 what exactly does the built-in fallback do?</b></summary>
+<summary><b>🧩 what does the built-in option actually do?</b></summary>
 
 <br>
 
-Three honest simplifications, each loud enough to notice:
+Three honest shortcuts, each easy to spot:
 
-- **Plural categories** — every number classifies as `other`. Exact-number variants (`[1]`, `[21]`) still match, because exact matching is spec behavior, not CLDR data.
-- **NUMBER** — honors every ECMA-402 *digit* option (`minimumFractionDigits`, `maximumSignificantDigits`, …) with locale-blind rendering: correct digits, no grouping separators, no symbols.
-- **DATETIME** — renders ISO-8601.
+- **Plurals** — every number lands in one catch-all category. Exact-number cases (`[1]`, `[21]`) still match, because that's plain matching, not language data.
+- **Numbers** — it applies digit settings (`minimumFractionDigits`, `maximumSignificantDigits`, …) correctly, but without grouping separators or currency symbols.
+- **Dates** — it prints the plain ISO date format (`2026-01-15T…`).
 
-The full option surface is *validated* by the core regardless of backend, so a typo'd option name fails the same way everywhere. What varies per backend is rendering fidelity — and where a backend can't honor an option, it degrades loud (see [Error handling](#error-handling)).
+Whichever backend you use, `fluent_bundle` still *checks* your option names, so a typo fails the same way everywhere. What changes between backends is how faithfully a value renders — and when a backend can't honour an option, it says so out loud (see [Error handling](#error-handling)).
 
 </details>
 
@@ -138,7 +138,7 @@ The full option surface is *validated* by the core regardless of backend, so a t
 
 ## Usage
 
-Highlights below — every method and full signature lives in the [API reference](https://pub.dev/documentation/fluent_bundle/latest/). Each snippet's output is pinned by the example test, so what you see is what actually renders.
+Highlights below — every method and full signature lives in the [API reference](https://pub.dev/documentation/fluent_bundle/latest/). Each snippet's output is checked by the example test, so what you see is what actually renders.
 
 ### Messages, terms, attributes
 
@@ -184,11 +184,11 @@ bundle.formatMessage('items', args: {'count': 5});      // "5 items"
 bundle.formatMessage('platform', args: {'os': 'mac'});  // "Command"
 ```
 
-Swap in a satellite backend and a `[one]` variant fires exactly when that locale's CLDR rules say it should — in Russian, that includes 21, 31, and 101.
+Add `fluent_intl` or `fluent_icu` and a `[one]` variant fires exactly when that language's rules say it should — in Russian, that includes 21, 31, and 101.
 
 ### NUMBER and DATETIME
 
-FTL's two built-in functions take the ECMA-402 option bags — the same names JavaScript's `Intl` uses:
+FTL's two built-in functions take options with the same names JavaScript's `Intl` uses:
 
 ```dart
 final bundle = FluentBundle('en', useIsolating: false)..addResource(r'''
@@ -203,29 +203,28 @@ bundle.formatMessage('launched', args: {'at': DateTime.utc(2026, 1, 15, 12, 30)}
 // "2026-01-15T12:30:00.000Z"  (ISO-8601 under the built-in fallback)
 ```
 
-Currency, units, compact notation, calendars, time zones — the full bags are accepted here and rendered by the satellites; each satellite's README shows its surface with pinned output.
+Currency, units, compact notation, calendars, time zones — all of these options are accepted here and take effect once you add a backend; the [`fluent_intl`](https://pub.dev/packages/fluent_intl) and [`fluent_icu`](https://pub.dev/packages/fluent_icu) READMEs show each one with tested output.
 
-### Bidi isolation and transforms
+### Right-to-left text and transforms
+
+When you drop a value into a message, Fluent wraps it in two invisible marks so that right-to-left text (Arabic, Hebrew) sitting inside a left-to-right sentence — or the reverse — can't visually rearrange the words around it. This is on by default.
 
 ```dart
 const ftl = r'hello = Hello, { $name }!';
 
-// Default: substituted values are wrapped in FSI (U+2068) / PDI (U+2069)
-// so RTL user content can't visually reorder the surrounding text.
-FluentBundle('en')..addResource(ftl);                        // isolation on
-FluentBundle('en', useIsolating: false)..addResource(ftl);   // plain output
+FluentBundle('en')..addResource(ftl);                        // wrapping on (default)
+FluentBundle('en', useIsolating: false)..addResource(ftl);   // wrapping off
 
-// `transform` rewrites author-written pattern text only — substituted
-// values and string literals pass through untouched. The classic use is
-// pseudo-localization during QA: every hardcoded string in the UI stays
-// lowercase and exposes itself.
+// `transform` rewrites only the text the translator wrote — the values you
+// pass in, and quoted strings, are left alone. The common use is a quick QA
+// pass that forces every translated string to stand out on screen:
 final pseudo = FluentBundle('en', useIsolating: false,
     transform: (text) => text.toUpperCase())
   ..addResource(ftl);
 pseudo.formatMessage('hello', args: {'name': 'Aria'});   // "HELLO, Aria!"
 ```
 
-The isolation marks are invisible in a UI and jarring in a test assertion — construct test bundles with `useIsolating: false`, ship the default.
+Those wrapping marks are invisible on screen but show up in a test's string comparison, so build test bundles with `useIsolating: false` and ship the default on.
 
 ### Custom functions
 
@@ -243,12 +242,12 @@ bundle.formatMessage('len', args: {'word': 'fluent'});
 
 ### Locale negotiation and bundle chains
 
-Two primitives turn "the user wants `de-CH`" into "these bundles, in this order":
+Two functions turn "the user wants `de-CH`" into "these bundles, in this order":
 
 ```dart
-// requested tags × available tags → an ordered fallback chain.
-// Exact match, then truncation (de-CH → de), then a language-prefix
-// bridge, then the fallback — never pulling in a MORE specific variant.
+// the languages you want × the languages you have → an ordered fallback list.
+// Exact match first, then a broader form (de-CH → de), then any variant of
+// the language, then the fallback — never something MORE specific than asked.
 final chain = negotiateLocaleChain(
   requested: ['de-CH'],
   available: ['en', 'de', 'de-CH', 'fr'],
@@ -256,20 +255,20 @@ final chain = negotiateLocaleChain(
 );
 // ['de-CH', 'de', 'en']
 
-// One bundle per chain member, then a chain view over them: the first
-// bundle that OWNS a message formats it, in its own locale's context.
+// One bundle per language, then a chain over them: the first bundle that
+// HAS a message formats it, in its own language.
 final chained = FluentBundleChain([deCh, de, en]);
 chained.formatMessage('only-in-english');   // falls through to en
 ```
 
-A single bundle can also carry the chain for the backend's benefit — `FluentBundle.locales(['de-CH', 'de', 'en'])` formats as `de-CH` and documents the rest.
+A single bundle can also carry the whole list — `FluentBundle.locales(['de-CH', 'de', 'en'])` formats as `de-CH` and remembers the rest for fallback.
 
 <details>
 <summary><b>🧩 why "first bundle that owns it", not "merge everything"?</b></summary>
 
 <br>
 
-Merging resources from three locales into one bundle would format a German message with the *chain head's* plural rules and formatters — subtly wrong in ways nobody catches in review. The chain view keeps each message in the locale it was written for: a `de` message formats with `de` plurals and `de` numbers even when the chain head is `de-CH`. Attribute misses stay on the owning bundle too — a message found in `de` whose attribute is absent reports the miss there instead of silently walking further down.
+Merging three languages' files into one bundle would format a German message using the *top* language's plural rules and number formatting — subtly wrong, and the kind of thing nobody catches in review. Keeping the chain separate means each message formats in the language it was written for: a `de` message uses `de` plurals and `de` numbers even when the top of the chain is `de-CH`. The same holds for a missing attribute — a message found in `de` whose attribute is missing reports it there, instead of quietly walking further down the chain.
 
 </details>
 
@@ -294,7 +293,7 @@ final spans = bundle.formatMessageAsSpans('banner', args: {'plan': 'Pro'});
 
 `formatMessage` on the same message returns the flat string with the tags intact; `formatMessageAsSpans` gives you the tree. The parser (`parseFluentMarkup`) also runs standalone on any resolved string. In Flutter, [`fluent_flutter`](https://pub.dev/packages/fluent_flutter)'s `markup.dart` turns this tree into `InlineSpan`s — styles, tap recognizers, custom builders.
 
-One trap worth knowing: the tags ride an HTML5 parser, so HTML *void elements* (`<link>`, `<br>`, `<img>`) parse childless and would swallow the text you meant to wrap. Pick tag names that aren't void elements (`<a>`, `<cta>`, `<bold>` are all fine).
+One trap worth knowing: the tags are parsed by an HTML5 parser, so HTML *void elements* (`<link>`, `<br>`, `<img>`) parse childless and would drop the text you meant to wrap. Pick tag names that aren't void elements (`<a>`, `<cta>`, `<bold>` are all fine).
 
 ### Live updates
 
@@ -309,9 +308,9 @@ bundle.addResource('status = v2', allowOverrides: true);
 bundle.formatMessage('status');                       // "v2"
 ```
 
-### The syntax barrel
+### Using the parser on its own
 
-`package:fluent_bundle/syntax.dart` is the parser as a standalone tool — for linters, editors, extraction tooling, and generators. Every AST node carries its source span; malformed entries become `Junk` nodes instead of failing the file:
+`package:fluent_bundle/syntax.dart` gives you the FTL parser as a standalone tool — for linters, editors, string-extraction tools, and code generators. Every node in the parsed tree remembers where it came from in the source, and a broken entry becomes a `Junk` node instead of failing the whole file:
 
 ```dart
 import 'package:fluent_bundle/syntax.dart';
@@ -328,13 +327,13 @@ resource.body.whereType<Message>().first.comment?.content;
 // "A comment attached to the message below."
 ```
 
-[`fluent_gen`](https://pub.dev/packages/fluent_gen) is built on this barrel — the same spans power its build-time diagnostics.
+[`fluent_gen`](https://pub.dev/packages/fluent_gen) is built on this parser — the same source positions drive its build-time warnings.
 
 ---
 
 ## Error handling
 
-A localization runtime must never take the app down over a bad translation. Every failure here is an **inert value**: formatting always returns output (the best rendering it can), and problems land in a list you pass in — or are dropped if you don't:
+A translation system must never crash your app over a bad string. Every failure here is a value, not an exception: formatting always returns text (the best it can manage), and problems go into a list you pass in — or are dropped if you don't:
 
 ```dart
 final errors = <FluentError>[];
@@ -350,15 +349,15 @@ The hierarchy — every subclass of `FluentError`:
 | `FluentParseError` | An FTL entry didn't parse (also visible as `Junk` on the resource) |
 | `FluentReferenceError` | A message / term / variable / function reference points at nothing |
 | `FluentCyclicReferenceError` | Message references form a loop — resolution stops, output survives |
-| `FluentResolutionLimitError` | A pattern expanded past the spec's placeable limit |
-| `FluentTypeError` | A value or formatting option can't be honored (this is the degrade signal — see below) |
+| `FluentResolutionLimitError` | A message referenced other messages so deeply it hit the safety limit |
+| `FluentTypeError` | A value or formatting option couldn't be applied (the "when a backend can't do something" case, below) |
 | `FluentArgumentError` | A function received arguments it can't accept |
 | `FluentFormatError` | A backend formatter rejected the input value |
 | `FluentOverrideError` | `addResource` hit a duplicate id without `allowOverrides` |
 
-**The degrade contract.** Backends never silently drop an option they can't honor. They render the nearest supported form *and* record a `FluentTypeError` — so QA sees every gap in the error stream while users still see reasonable output. The conformance harness (`package:fluent_bundle/testing.dart`) proves this in both directions for every declared gap, in the core and in every satellite.
+**When a backend can't do something.** A backend never quietly ignores an option it can't handle. It renders the closest form it can *and* records a `FluentTypeError` — so your tests catch the gap while users still see reasonable text. The test harness (`package:fluent_bundle/testing.dart`) checks both sides for every known gap, in `fluent_bundle` and in each backend.
 
-Plain `throw`s are reserved for programmer error — adding a resource to a read-only chain view, formatting a foreign bundle's pattern through a chain.
+A real `throw` is reserved for mistakes in your own code — like adding a resource to a read-only chain, or formatting one bundle's message through a different bundle's chain.
 
 ---
 
@@ -374,29 +373,37 @@ The test suite runs twice — on the VM and in real Chrome — so "works on web"
 
 ---
 
-## Choosing Fluent (and when not to)
+## When to use Fluent (and when not)
 
-Fluent's pitch over key-value formats (ARB, JSON): **grammar lives in the translation file, not in your code.** A Polish translator writes Polish's four plural forms in the `.ftl`; your Dart passes `count` and never learns Polish grammar. Message references keep product names in one line. Selectors handle gender and platform variants without new code paths.
+Most translation tools treat each string as a dictionary entry: one English line, one translated line. That's fine until a language needs grammar English doesn't have — a word that changes with gender, a number with six plural forms, a phrase that bends by grammatical case. In those tools *you* add that logic in your code, and every language is then locked into the same shape.
 
-**"I already use ARB / `flutter_localizations` gen-l10n."** Keep it if your strings are simple substitutions — it's official and well-worn. The moment translators need real plural/gender/case logic per locale, ARB pushes that logic into ICU MessageFormat strings inside JSON, which nobody enjoys editing. Fluent is the format designed for exactly that moment.
+Fluent works the other way. Each language's `.ftl` file can add its own plurals, genders, and special cases on its own — the German file can make a distinction the English file never makes, and you don't touch a line of code. This is the one thing key-value tools (ARB, slang, easy_localization) can't do: they fix each message's shape once, in code, so every language must match it. Mozilla built Fluent for exactly this, so Firefox's translators could use the full grammar of their language without waiting on an engineer.
 
-**"I use slang / easy_localization."** Same trade: excellent ergonomics over key-value maps, and the grammar ceiling arrives with the first grammatically-rich locale. Fluent raises the ceiling; [`fluent_gen`](https://pub.dev/packages/fluent_gen) gives you back the typed-accessor ergonomics.
+**Reach for something simpler if** your app ships one language, or your strings are plain with no real plural or gender needs — a translation system isn't worth the setup for text you never vary.
 
-And if your app ships one language and never will more — string constants. Don't add a localization runtime for data you never vary.
+**Coming from ARB / `flutter_localizations`?** It's official and fine for simple substitutions. Once translators need real per-language plural, gender, or case rules, ARB pushes that logic into ICU MessageFormat strings inside JSON — awkward to write and read. Fluent is built for that case.
+
+**Coming from slang / easy_localization?** Same per-language freedom described above — and [`fluent_gen`](https://pub.dev/packages/fluent_gen) adds the typed `t.welcome(...)` calls those tools are loved for, on top of Fluent.
 
 ---
 
 ## The family
 
-One core, four satellites — add exactly what your app needs:
+Five packages. You install `fluent_bundle` plus whichever of the others fit your app.
+
+**Which packages do I install?**
+- **Flutter app** → `fluent_flutter` + `fluent_intl`
+- …need every language, calendar, and unit, or identical output on every platform → swap `fluent_intl` for `fluent_icu`
+- …want typos and missing arguments caught before you run → add `fluent_gen`
+- **Pure Dart** (command-line tool, server) → `fluent_bundle` + `fluent_intl` (the same two swaps apply)
 
 | Package | What it adds |
 |---|---|
-| `fluent_bundle` (this) | The runtime: parser, resolver, markup, negotiation, backend seam |
-| [`fluent_intl`](https://pub.dev/packages/fluent_intl) | CLDR backend on `package:intl` — zero setup, pure Dart |
-| [`fluent_icu`](https://pub.dev/packages/fluent_icu) | Full-fidelity ECMA-402 backend on ICU4X — every locale, every option |
-| [`fluent_gen`](https://pub.dev/packages/fluent_gen) | Build-time typed accessors — message ids and arguments checked by the analyzer |
-| [`fluent_flutter`](https://pub.dev/packages/fluent_flutter) | Flutter integration — locale lifecycle, asset loading, delegates, `InlineSpan` markup, hot reload |
+| `fluent_bundle` (this) | Reads `.ftl` files and produces the final text — plus markup, language fallback, and the backend hook |
+| [`fluent_intl`](https://pub.dev/packages/fluent_intl) | A formatting backend built on `package:intl` — zero setup, pure Dart |
+| [`fluent_icu`](https://pub.dev/packages/fluent_icu) | A formatting backend built on ICU4X — every language, every number and date option |
+| [`fluent_gen`](https://pub.dev/packages/fluent_gen) | Turns your `.ftl` files into typed Dart calls, so typos and wrong arguments fail to compile |
+| [`fluent_flutter`](https://pub.dev/packages/fluent_flutter) | The Flutter parts — switching languages, loading from assets, the `MaterialApp` hook-up, markup widgets, hot reload |
 
 ---
 
@@ -406,10 +413,10 @@ The README covers the everyday stuff. wanna go deeper?
 
 | Doc | What's inside |
 |---|---|
-| [Architecture](docs/ARCHITECTURE.md) | How it's built: the layers, the backend seam, the conformance harness |
+| [Architecture](docs/ARCHITECTURE.md) | How it's built: the layers, how backends plug in, the test harness |
 | [Capabilities](docs/CAPABILITY_ROADMAP.md) | What's shipped, what's planned, what won't happen |
 | [Updating](docs/UPDATING.md) | Maintenance recipes, the spec watchlist, the family release checklist |
-| [Example](example/) | The whole tour in one runnable file, output pinned by test |
+| [Example](example/) | The whole tour in one runnable file, output checked by test |
 
 ---
 

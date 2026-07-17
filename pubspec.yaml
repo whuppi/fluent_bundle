@@ -1,9 +1,9 @@
 name: fluent_bundle
 version: 0.0.0
 description: >-
-  Project Fluent (Mozilla's localization system) for Dart — a
-  spec-complete parser and resolver with pluggable locale backends and
-  inline-markup spans.
+  Project Fluent (Mozilla's localization system) for Dart. Real
+  per-language plural and gender rules, a choice of formatting backend,
+  and inline markup. Pure Dart.
 homepage: https://github.com/whuppi/fluent_bundle
 repository: https://github.com/whuppi/fluent_bundle
 issue_tracker: https://github.com/whuppi/fluent_bundle/issues
@@ -25,9 +25,9 @@ executables:
 environment:
   sdk: ^3.7.0
 
-# Pure Dart on purpose — no Flutter SDK, no plugins, no CLDR data. The
-# core of the fluent family: satellites add CLDR backends (fluent_intl,
-# fluent_icu), codegen (fluent_gen), and Flutter wiring (fluent_flutter).
+# Pure Dart on purpose — no Flutter SDK, no plugins, no language data. The
+# base package; the add-on packages provide formatting backends (fluent_intl,
+# fluent_icu), code generation (fluent_gen), and Flutter support (fluent_flutter).
 dependencies:
   # HTML5-conformant parser for the inline-markup feature in
   # `package:fluent_bundle/markup.dart`. Pure Dart, the Dart team's
