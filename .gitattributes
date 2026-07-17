@@ -1,0 +1,7 @@
+# The syntax corpus is byte-exact test data. Most fixtures are LF, but cr.ftl
+# and crlf.ftl deliberately carry lone-CR and CRLF line endings to exercise the
+# parser's line-end handling. Freeze every fixture as-committed (-text = no eol
+# conversion) so a Windows checkout with core.autocrlf=true can't rewrite LF to
+# CRLF and break the exact-match tests.
+test/_corpus/syntax/*.ftl  -text
+test/_corpus/syntax/*.json -text
