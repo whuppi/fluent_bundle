@@ -2,7 +2,7 @@ import 'package:fluent_bundle/src/errors/parse_error.dart';
 import 'package:fluent_bundle/src/syntax/parser/stream.dart';
 import 'package:test/test.dart';
 
-void main() {
+void registerStreamTests() {
   group('ParserStream — basic cursor', () {
     test('starts at index 0', () {
       final s = ParserStream('abc');

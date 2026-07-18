@@ -7,7 +7,7 @@
 import 'package:fluent_bundle/markup.dart';
 import 'package:test/test.dart';
 
-void main() {
+void registerFluentSpanEqualityTests() {
   group('FluentTextSpan', () {
     test('equal when text matches', () {
       expect(const FluentTextSpan('hello'), const FluentTextSpan('hello'));

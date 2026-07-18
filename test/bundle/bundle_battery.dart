@@ -3,7 +3,7 @@ import 'package:fluent_bundle/src/values/fluent_value.dart';
 import 'package:test/test.dart';
 import '../_helpers/bundle_factory.dart';
 
-void main() {
+void registerBundleTests() {
   group('FluentBundle — basic formatMessage', () {
     test('plain text message renders verbatim', () {
       final bundle = testBundle('en');

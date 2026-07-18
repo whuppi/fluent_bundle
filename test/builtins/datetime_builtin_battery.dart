@@ -5,7 +5,7 @@ import 'package:fluent_bundle/fluent_bundle.dart';
 import 'package:fluent_bundle/src/builtins/datetime_builtin.dart';
 import 'package:test/test.dart';
 
-void main() {
+void registerDatetimeBuiltinTests() {
   FluentDateTimeOptions parse(
     Map<String, String> named, [
     List<FluentError>? errors,

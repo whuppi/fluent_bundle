@@ -171,7 +171,7 @@ package:
 The suite is pure Dart, so the chrome lane needs only Chrome:
 
 ```sh
-make test-web        # = dart test -p chrome
+make test-web        # the web runner (test/runners/web_runner_test.dart) in Chrome
 ```
 
 The icu-backed chrome coverage lives in fluent_icu (its `make test-web`

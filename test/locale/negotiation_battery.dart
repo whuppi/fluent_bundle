@@ -1,7 +1,7 @@
 import 'package:fluent_bundle/fluent_bundle.dart';
 import 'package:test/test.dart';
 
-void main() {
+void registerNegotiationTests() {
   group('negotiateLocaleChain', () {
     test('exact match leads the chain', () {
       expect(

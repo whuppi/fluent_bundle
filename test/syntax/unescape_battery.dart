@@ -1,7 +1,7 @@
 import 'package:fluent_bundle/syntax.dart';
 import 'package:test/test.dart';
 
-void main() {
+void registerUnescapeTests() {
   group('unescapeFluentString — recognized escapes', () {
     test(r'\\ decodes to a single backslash', () {
       expect(unescapeFluentString(r'a\\b'), r'a\b');

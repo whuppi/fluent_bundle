@@ -6,7 +6,7 @@ import 'package:test/test.dart';
 
 import '../_helpers/bundle_factory.dart';
 
-void main() {
+void registerRuntimeBarrelTests() {
   group('runtime barrel', () {
     test('parses + formats a basic message', () {
       final bundle = testBundle('en');

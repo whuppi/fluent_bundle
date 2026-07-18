@@ -2,7 +2,7 @@ import 'package:fluent_bundle/src/syntax/ast/ast.dart';
 import 'package:fluent_bundle/src/syntax/parser/parser.dart';
 import 'package:test/test.dart';
 
-void main() {
+void registerCloneEqualsTests() {
   final parser = FluentParser(
     options: const FluentParserOptions(withSpans: true),
   );

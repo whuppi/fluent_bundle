@@ -35,8 +35,8 @@ make check
 
 Runs `lint-shell` + `analyze` (resolve + format + the shared analyze
 core at --fatal-infos) + `analyze-floor` (lowest allowed deps) +
-`platforms` (the same pana pub.dev runs) + `test-guards` (two-world
-suite rules) + `test` (VM) + `test-web` (the same suites in real
+`platforms` (the same pana pub.dev runs) + `test-guards` (battery /
+runner rules) + `test` (VM) + `test-web` (the same suites in real
 Chrome) + `test-example` (the pinned showcase).
 Must pass. Don't suppress with `// ignore:` — fix the underlying
 issue.
@@ -69,8 +69,10 @@ The maintainer handles releases.
 - Errors are inert values — formatting NEVER throws for bad input.
   New failure modes get a typed `FluentError` subclass, recorded into
   the caller's list, with output still returned.
-- Every suite runs on the VM AND in Chrome unless it declares
-  `@TestOn('vm')` — `make test-guards` enforces this for dart:io /
+- Test logic lives in `*_battery.dart` register functions; the only
+  test entry points are `test/runners/` (one per world — VM, Chrome).
+  A battery runs in BOTH worlds unless it carries a `vm-only: <reason>`
+  marker — `make test-guards` enforces this for dart:io /
   dart:ffi importers.
 - The core carries no CLDR data or backend-specific behavior — that
   belongs in the satellites. The `FluentBackend` seam is the wall.

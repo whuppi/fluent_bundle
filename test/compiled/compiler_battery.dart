@@ -4,7 +4,7 @@ import 'package:fluent_bundle/src/compiled/compiler.dart';
 import 'package:fluent_bundle/src/syntax/parser/parser.dart';
 import 'package:test/test.dart';
 
-void main() {
+void registerCompilerTests() {
   final parser = FluentParser(
     options: const FluentParserOptions(withSpans: false),
   );

@@ -1,7 +1,7 @@
 import 'package:fluent_bundle/src/values/fluent_value.dart';
 import 'package:test/test.dart';
 
-void main() {
+void registerResolveDigitsTests() {
   group('FluentNumber.resolveDigits — ECMA-402 digit resolution', () {
     void expectDigits(FluentNumber n, String digits, int frac) {
       final r = n.resolveDigits();

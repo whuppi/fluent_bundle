@@ -8,7 +8,7 @@ import 'package:fluent_bundle/fluent_bundle.dart';
 import 'package:fluent_bundle/markup.dart';
 import 'package:test/test.dart';
 
-void main() {
+void registerFormatMessageAsSpansTests() {
   group('formatMessageAsSpans — interpolation + markup', () {
     test('placeholder + markup', () {
       final bundle = FluentBundle.locales(['en'], useIsolating: false)

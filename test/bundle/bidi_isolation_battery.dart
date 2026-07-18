@@ -4,7 +4,7 @@ import 'package:test/test.dart';
 const String _fsi = '\u2068';
 const String _pdi = '\u2069';
 
-void main() {
+void registerBidiIsolationTests() {
   group('Bidi isolation — useIsolating: true (spec default)', () {
     test('placeable values are wrapped in FSI/PDI', () {
       // Default: useIsolating: true.

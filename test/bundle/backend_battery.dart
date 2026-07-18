@@ -11,7 +11,7 @@ class _Upper extends FluentValue {
   String format(FluentFormatContext context) => text.toUpperCase();
 }
 
-void main() {
+void registerBackendTests() {
   group('spec builtins are always available (F7)', () {
     test(
       'NUMBER resolves with the bare spec backend — no backend imported',

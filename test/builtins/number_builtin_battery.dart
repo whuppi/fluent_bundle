@@ -8,7 +8,7 @@ import 'package:fluent_bundle/fluent_bundle.dart';
 import 'package:fluent_bundle/src/builtins/number_builtin.dart';
 import 'package:test/test.dart';
 
-void main() {
+void registerNumberBuiltinTests() {
   FluentNumberOptions parse(
     Map<String, String> named, [
     List<FluentError>? errors,

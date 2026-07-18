@@ -13,7 +13,6 @@
 // VM-only: this runner reads `.ftl` and `.json` fixtures from disk via
 // `dart:io`. The parser itself is pure-Dart and cross-platform; the
 // corpus harness is the only piece that needs filesystem access.
-@TestOn('vm')
 library;
 
 import 'dart:convert';
@@ -24,7 +23,7 @@ import 'package:test/test.dart';
 
 import 'ast_to_json.dart';
 
-void main() {
+void registerSyntaxCorpusTests() {
   final corpusDir = Directory('test/_corpus/syntax');
   if (!corpusDir.existsSync()) {
     fail('Mozilla Fluent Syntax corpus not found at ${corpusDir.path}');

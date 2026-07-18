@@ -3,7 +3,7 @@
 import 'package:fluent_bundle/syntax.dart';
 import 'package:test/test.dart';
 
-void main() {
+void registerSyntaxBarrelTests() {
   group('syntax barrel', () {
     test('parses and walks the AST', () {
       final parser = FluentParser();

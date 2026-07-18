@@ -9,7 +9,7 @@
 import 'package:fluent_bundle/fluent_bundle.dart';
 import 'package:test/test.dart';
 
-void main() {
+void registerTermAttributeSelectorCyclesTests() {
   group('cyclic references through term-attribute selectors', () {
     test('cycle in a selector renders the default variant + Cyclic error', () {
       final bundle = FluentBundle('en-US', useIsolating: false)..addResource('''

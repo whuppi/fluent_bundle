@@ -8,7 +8,7 @@
 import 'package:fluent_bundle/markup.dart';
 import 'package:test/test.dart';
 
-void main() {
+void registerMarkupParserTests() {
   group('§7.2 — basic parsing', () {
     test('empty string yields a single empty text span', () {
       expect(parseFluentMarkup(''), const [FluentTextSpan('')]);

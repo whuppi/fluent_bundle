@@ -2,7 +2,7 @@ import 'package:fluent_bundle/fluent_bundle.dart';
 import 'package:fluent_bundle/markup.dart';
 import 'package:test/test.dart';
 
-void main() {
+void registerBundleChainTests() {
   // deCh is deliberately partial; de fills some gaps; en is the base.
   // de carries an uppercasing transform so output PROVES which member
   // formatted (the chain must format in the owner's context).

@@ -6,7 +6,7 @@ import 'package:test/test.dart';
 
 import '../../example/main.dart';
 
-void main() {
+void registerExampleTests() {
   late Map<String, String> lines;
 
   setUpAll(() {

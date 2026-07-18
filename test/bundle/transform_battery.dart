@@ -1,7 +1,7 @@
 import 'package:fluent_bundle/fluent_bundle.dart';
 import 'package:test/test.dart';
 
-void main() {
+void registerTransformTests() {
   /// Build a bundle wired with a single uppercasing transform, no
   /// other features — keeps the asserts focused on what the transform
   /// touches and what it doesn't.

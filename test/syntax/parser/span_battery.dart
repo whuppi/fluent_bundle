@@ -2,7 +2,7 @@ import 'package:fluent_bundle/src/syntax/ast/ast.dart';
 import 'package:fluent_bundle/src/syntax/parser/parser.dart';
 import 'package:test/test.dart';
 
-void main() {
+void registerSpanTests() {
   Resource parseWithSpans(String source) => FluentParser(
     options: const FluentParserOptions(withSpans: true),
   ).parse(source);

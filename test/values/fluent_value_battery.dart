@@ -1,7 +1,7 @@
 import 'package:fluent_bundle/src/values/fluent_value.dart';
 import 'package:test/test.dart';
 
-void main() {
+void registerFluentValueTests() {
   group('FluentValue.coerce', () {
     test('passes a FluentValue through unchanged', () {
       const original = FluentString('hi');
