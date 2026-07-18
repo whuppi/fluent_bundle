@@ -1,5 +1,5 @@
 name: fluent_bundle
-version: 0.0.0
+version: 0.1.0
 description: >-
   Project Fluent (Mozilla's localization system) for Dart. Real
   per-language plural and gender rules, a choice of formatting backend,

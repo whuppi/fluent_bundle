@@ -66,7 +66,7 @@ Pure Dart. No native code, no build step, no platform plugins — the same packa
 
 ```yaml
 dependencies:
-  fluent_bundle:
+  fluent_bundle: ^0.1.0
 ```
 
 Nothing else to do, on any platform.
