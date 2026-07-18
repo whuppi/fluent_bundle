@@ -138,8 +138,15 @@ package:
    fluent_gen expects native-only, no web — it is a dart:io
    build_runner tool). fluent_bundle's gate is live already.
 2. pubspec description (60–180 chars) + `topics`.
-3. CHANGELOG two-lane (core vs satellites move independently after
-   1.0; before it, one synchronized version line).
+3. CHANGELOG two-lane (`.pre` for prereleases, `.md` for stable). Every
+   package versions INDEPENDENTLY, pre-1.0 and after — each moves only
+   when it itself changes (e.g. fluent_icu shipped 0.1.1 for a dependency
+   bump while the rest stayed 0.1.0). No lockstep: forcing every package
+   to the same number would republish unchanged packages for nothing.
+   Compatibility is carried by the shared core, not by matching version
+   numbers — every package pins `fluent_bundle: ^0.N.0`, so pub resolves
+   one common fluent_bundle across whatever the user picked, or fails
+   loudly. The fluent_bundle line is the compatibility axis.
 4. Verify the three canonical docs + README against the shipped
    surface (the sprint-end doc check, run once more at release).
 5. README family conventions hold (they apply to any future satellite
