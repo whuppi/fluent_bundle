@@ -75,7 +75,7 @@ When in doubt, read existing code in this repo and match it. Per-repo style cons
 
 - **Errors are inert values — formatting NEVER throws for bad input.** Malformed FTL becomes `Junk`; bad references become recorded `FluentError`s; output is always returned. A new failure mode gets a typed `FluentError` subclass, never a throw.
 - **The `FluentBackend` seam is the wall.** The core carries no CLDR data and no plural/number/date fidelity — that lives in satellites. Don't add locale data here.
-- **Every suite runs on the VM AND in Chrome** unless it declares `@TestOn('vm')`; `make test-guards` enforces that dart:io / dart:ffi importers do.
+- **Test logic lives in `*_battery.dart` register functions**; the only test entry points are `test/runners/` (one per world — VM, Chrome). A battery runs in BOTH worlds unless marked `vm-only: <reason>`; `make test-guards` enforces the membership rules.
 - **Invisible characters** (FSI/PDI U+2068/U+2069, U+202F) appear in source only as `\uXXXX` escapes, never raw bytes — the analyzer flags raw ones and pins silently break.
 - **Markup rides an HTML5 parser** — HTML void elements (`<link>`, `<br>`, `<img>`) parse childless and swallow their content. Use non-void tag names.
 
